@@ -21,6 +21,58 @@ const analysisSchema = new mongoose.Schema({
   negativeTraits: [{
     type: String
   }],
+  // Personality Analysis
+  personalityAnalysis: {
+    facialFeatures: [{
+      feature: String,
+      interpretation: String,
+      confidence: Number
+    }],
+    mianXiang: {
+      elements: [String],
+      interpretation: String
+    },
+    physiognomy: {
+      traits: [String],
+      interpretation: String
+    }
+  },
+  // Age & Health Analysis
+  ageHealthAnalysis: {
+    estimatedAge: Number,
+    biologicalAge: Number,
+    healthIndicators: [{
+      indicator: String,
+      status: String,
+      confidence: Number
+    }],
+    stressLevel: {
+      value: Number,
+      interpretation: String
+    },
+    fatigueLevel: {
+      value: Number,
+      interpretation: String
+    },
+    hydrationLevel: {
+      value: Number,
+      interpretation: String
+    }
+  },
+  // Beauty & Symmetry Analysis
+  beautyAnalysis: {
+    symmetryScore: Number,
+    goldenRatioScore: Number,
+    aestheticBalance: {
+      score: Number,
+      interpretation: String
+    },
+    celebrityMatches: [{
+      name: String,
+      similarity: Number,
+      features: [String]
+    }]
+  },
   confidence: {
     type: Number,
     default: 0.95

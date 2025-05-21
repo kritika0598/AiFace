@@ -28,7 +28,11 @@ import {
   Avatar,
   Chip,
   useTheme,
-  alpha
+  alpha,
+  Tabs,
+  Tab,
+  LinearProgress,
+  Divider
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -39,6 +43,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LogoutIcon from '@mui/icons-material/Logout';
 import HistoryIcon from '@mui/icons-material/History';
+import PersonIcon from '@mui/icons-material/Person';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { keyframes } from '@mui/system';
 
 // Update scanning animation keyframes
@@ -72,6 +79,7 @@ const Dashboard = () => {
   const [usage, setUsage] = useState({ count: 0, limit: 5, remaining: 5 });
   const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [analysisTab, setAnalysisTab] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -263,8 +271,20 @@ const Dashboard = () => {
             </Box>
           </Box>
         ) : analysisResult ? (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+              <Tabs
+                value={analysisTab}
+                onChange={(e, newValue) => setAnalysisTab(newValue)}
+                variant="fullWidth"
+              >
+                <Tab icon={<PersonIcon />} label="Personality" />
+                <Tab icon={<HealthAndSafetyIcon />} label="Age & Health" />
+                <Tab icon={<AutoAwesomeIcon />} label="Beauty & Symmetry" />
+              </Tabs>
+            </Box>
+
+            <Box sx={{ mb: 3 }}>
               <Card>
                 <Box sx={{ position: 'relative' }}>
                   <CardMedia
@@ -273,130 +293,318 @@ const Dashboard = () => {
                     alt="Analyzed face"
                     sx={{
                       width: '100%',
-                      maxHeight: '500px',
+                      maxHeight: '300px',
                       objectFit: 'contain',
                       bgcolor: 'black'
                     }}
                   />
-                  {analyzingImageId === selectedImage && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          width: '100%',
-                          height: '100%',
-                          bgcolor: 'transparent',
-                          '&::after': {
-                            content: '""',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            height: '2px',
-                            bgcolor: theme.palette.primary.main,
-                            animation: `${scanningAnimation} 2s infinite linear`
-                          }
-                        }}
-                      />
-                    </Box>
-                  )}
                 </Box>
-                <CardContent>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <CheckCircleIcon color="success" />
-                        <Typography variant="subtitle2" color="success.main">
-                          POSITIVE TRAITS
-                        </Typography>
-                      </Box>
-                      {analysisResult.positiveTraits?.length > 0 ? (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {analysisResult.positiveTraits.map((trait, index) => (
-                            <Chip
-                              key={index}
-                              label={trait}
-                              color="success"
-                              variant="outlined"
-                              size="small"
-                            />
-                          ))}
-                        </Box>
-                      ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          No positive traits identified
-                        </Typography>
-                      )}
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <ErrorIcon color="error" />
-                        <Typography variant="subtitle2" color="error.main">
-                          POTENTIAL DRAWBACKS
-                        </Typography>
-                      </Box>
-                      {analysisResult.negativeTraits?.length > 0 ? (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {analysisResult.negativeTraits.map((trait, index) => (
-                            <Chip
-                              key={index}
-                              label={trait}
-                              color="error"
-                              variant="outlined"
-                              size="small"
-                            />
-                          ))}
-                        </Box>
-                      ) : (
-                        <Typography variant="body2" color="text.secondary">
-                          No potential drawbacks identified
-                        </Typography>
-                      )}
-                    </Grid>
-                  </Grid>
-                </CardContent>
               </Card>
-            </Grid>
-            <Grid item xs={12}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2,
-                  bgcolor: alpha(theme.palette.primary.main, 0.05),
-                  borderRadius: 2,
-                  border: '1px solid',
-                  borderColor: alpha(theme.palette.primary.main, 0.1)
-                }}
-              >
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  DETAILED ANALYSIS
+            </Box>
+
+            <Paper sx={{ p: 2, mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                General Analysis
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                {analysisResult.message}
+              </Typography>
+            </Paper>
+
+            {analysisTab === 0 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Personality Analysis
                 </Typography>
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                  {analysisResult.message}
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Facial Features Analysis
+                      </Typography>
+                      {analysisResult.personalityAnalysis?.facialFeatures?.map((feature, index) => (
+                        <Box key={index} sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2" color="primary">
+                            {feature.feature}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {feature.interpretation}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Mian Xiang Analysis
+                      </Typography>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {analysisResult.personalityAnalysis?.mianXiang?.interpretation}
+                        </Typography>
+                        <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {analysisResult.personalityAnalysis?.mianXiang?.elements?.map((element, index) => (
+                            <Chip key={index} label={element} size="small" />
+                          ))}
+                        </Box>
+                      </Box>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Physiognomy Analysis
+                      </Typography>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {analysisResult.personalityAnalysis?.physiognomy?.interpretation}
+                        </Typography>
+                        <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {analysisResult.personalityAnalysis?.physiognomy?.traits?.map((trait, index) => (
+                            <Chip key={index} label={trait} size="small" />
+                          ))}
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <CheckCircleIcon color="success" />
+                            <Typography variant="subtitle2" color="success.main">
+                              POSITIVE TRAITS
+                            </Typography>
+                          </Box>
+                          {analysisResult.positiveTraits?.length > 0 ? (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                              {analysisResult.positiveTraits.map((trait, index) => (
+                                <Chip
+                                  key={index}
+                                  label={trait}
+                                  color="success"
+                                  variant="outlined"
+                                  size="small"
+                                />
+                              ))}
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              No positive traits identified
+                            </Typography>
+                          )}
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <ErrorIcon color="error" />
+                            <Typography variant="subtitle2" color="error.main">
+                              POTENTIAL DRAWBACKS
+                            </Typography>
+                          </Box>
+                          {analysisResult.negativeTraits?.length > 0 ? (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                              {analysisResult.negativeTraits.map((trait, index) => (
+                                <Chip
+                                  key={index}
+                                  label={trait}
+                                  color="error"
+                                  variant="outlined"
+                                  size="small"
+                                />
+                              ))}
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              No potential drawbacks identified
+                            </Typography>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {analysisTab === 1 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Age & Health Analysis
                 </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mt: 2, textAlign: 'right' }}
-                >
-                  Analyzed at: {new Date(analysisResult.timestamp || analysisResult.createdAt).toLocaleString()}
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Age Estimation
+                      </Typography>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Chronological Age
+                          </Typography>
+                          <Typography variant="h6">
+                            {analysisResult.ageHealthAnalysis?.estimatedAge} years
+                          </Typography>
+                        </Box>
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            Biological Age
+                          </Typography>
+                          <Typography variant="h6">
+                            {analysisResult.ageHealthAnalysis?.biologicalAge} years
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Health Indicators
+                      </Typography>
+                      {analysisResult.ageHealthAnalysis?.healthIndicators?.map((indicator, index) => (
+                        <Box key={index} sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            {indicator.indicator}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Status: {indicator.status}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ mb: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Stress Level
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={analysisResult.ageHealthAnalysis?.stressLevel?.value * 100}
+                              color={analysisResult.ageHealthAnalysis?.stressLevel?.value > 0.7 ? 'error' : 'primary'}
+                              sx={{ mb: 1 }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                              {analysisResult.ageHealthAnalysis?.stressLevel?.interpretation}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ mb: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Fatigue Level
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={analysisResult.ageHealthAnalysis?.fatigueLevel?.value * 100}
+                              color={analysisResult.ageHealthAnalysis?.fatigueLevel?.value > 0.7 ? 'error' : 'primary'}
+                              sx={{ mb: 1 }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                              {analysisResult.ageHealthAnalysis?.fatigueLevel?.interpretation}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <Box sx={{ mb: 2 }}>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Hydration Level
+                            </Typography>
+                            <LinearProgress
+                              variant="determinate"
+                              value={analysisResult.ageHealthAnalysis?.hydrationLevel?.value * 100}
+                              color={analysisResult.ageHealthAnalysis?.hydrationLevel?.value < 0.5 ? 'error' : 'primary'}
+                              sx={{ mb: 1 }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                              {analysisResult.ageHealthAnalysis?.hydrationLevel?.interpretation}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+
+            {analysisTab === 2 && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Beauty & Symmetry Analysis
                 </Typography>
-              </Paper>
-            </Grid>
-          </Grid>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Symmetry & Proportions
+                      </Typography>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          Facial Symmetry Score
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={analysisResult.beautyAnalysis?.symmetryScore * 100}
+                          sx={{ mb: 1 }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {analysisResult.beautyAnalysis?.symmetryScore * 100}% symmetrical
+                        </Typography>
+                      </Box>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          Golden Ratio Score
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={analysisResult.beautyAnalysis?.goldenRatioScore * 100}
+                          sx={{ mb: 1 }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {analysisResult.beautyAnalysis?.goldenRatioScore * 100}% match with Golden Ratio
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="subtitle2" gutterBottom>
+                          Aesthetic Balance
+                        </Typography>
+                        <LinearProgress
+                          variant="determinate"
+                          value={analysisResult.beautyAnalysis?.aestheticBalance?.score * 100}
+                          sx={{ mb: 1 }}
+                        />
+                        <Typography variant="body2" color="text.secondary">
+                          {analysisResult.beautyAnalysis?.aestheticBalance?.interpretation}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper sx={{ p: 2, mb: 2 }}>
+                      <Typography variant="subtitle1" gutterBottom>
+                        Celebrity Matches
+                      </Typography>
+                      {analysisResult.beautyAnalysis?.celebrityMatches?.map((match, index) => (
+                        <Box key={index} sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2">
+                            {match.name} ({match.similarity * 100}% match)
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                            {match.features.map((feature, idx) => (
+                              <Chip key={idx} label={feature} size="small" />
+                            ))}
+                          </Box>
+                        </Box>
+                      ))}
+                    </Paper>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+          </Box>
         ) : null}
       </DialogContent>
       <DialogActions>
