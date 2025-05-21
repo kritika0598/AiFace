@@ -42,6 +42,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LogoutIcon from '@mui/icons-material/Logout';
+import HistoryIcon from '@mui/icons-material/History';
 import { keyframes } from '@mui/system';
 
 // Update scanning animation keyframes
@@ -166,7 +167,11 @@ const Dashboard = () => {
       setAnalysisDialogOpen(true);
     } catch (error) {
       if (error.response?.status === 404) {
-        handleAnalyze(imageId);
+        setSnackbar({
+          open: true,
+          message: 'No previous analysis found. Please analyze the image first.',
+          severity: 'info'
+        });
       } else {
         console.error('Error fetching analysis:', error);
         setSnackbar({
@@ -575,7 +580,12 @@ const Dashboard = () => {
                       component="img"
                       image={`${API_URL}/${image.path}`}
                       alt="Uploaded face"
-                      sx={{ height: 200, objectFit: 'cover' }}
+                      sx={{ 
+                        height: 300,
+                        objectFit: 'contain',
+                        bgcolor: 'black',
+                        p: 1
+                      }}
                     />
                     {analyzingImageId === image._id && (
                       <Box
@@ -626,6 +636,14 @@ const Dashboard = () => {
                       disabled={analyzingImageId === image._id || usage.remaining === 0}
                     >
                       Analyze
+                    </Button>
+                    <Button
+                      size="small"
+                      startIcon={<HistoryIcon />}
+                      onClick={() => fetchAnalysis(image._id)}
+                      color="secondary"
+                    >
+                      View Results
                     </Button>
                     <IconButton
                       size="small"
