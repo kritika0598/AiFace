@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
+import { API_URL } from '../constants';
 import {
   Container,
   Box,
@@ -87,7 +88,7 @@ const Dashboard = () => {
   const fetchUsageStatus = async () => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/analysis/usage/status`,
+        `${API_URL}/api/analysis/usage/status`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }
@@ -100,7 +101,7 @@ const Dashboard = () => {
 
   const fetchImages = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/upload/my-images`, {
+      const response = await axios.get(`${API_URL}/api/upload/my-images`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setImages(response.data);
@@ -120,7 +121,7 @@ const Dashboard = () => {
 
     setUploading(true);
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/upload`, formData, {
+      await axios.post(`${API_URL}/api/upload`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data'
@@ -138,7 +139,7 @@ const Dashboard = () => {
 
   const handleDelete = async (imageId) => {
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/api/upload/${imageId}`, {
+      await axios.delete(`${API_URL}/api/upload/${imageId}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchImages();
@@ -152,7 +153,7 @@ const Dashboard = () => {
   const fetchAnalysis = async (imageId) => {
     try {
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/analysis/${imageId}`,
+        `${API_URL}/api/analysis/${imageId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }
@@ -181,7 +182,7 @@ const Dashboard = () => {
     try {
       setAnalyzingImageId(imageId);
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/analysis/analyze/${imageId}`,
+        `${API_URL}/api/analysis/analyze/${imageId}`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -270,7 +271,7 @@ const Dashboard = () => {
               <Card>
                 <CardMedia
                   component="img"
-                  image={`${process.env.REACT_APP_API_URL}/${images.find(img => img._id === selectedImage)?.path}`}
+                  image={`${API_URL}/${images.find(img => img._id === selectedImage)?.path}`}
                   alt="Analyzed face"
                   sx={{
                     width: '100%',
@@ -534,7 +535,7 @@ const Dashboard = () => {
                 >
                   <CardMedia
                     component="img"
-                    image={`${process.env.REACT_APP_API_URL}/${image.path}`}
+                    image={`${API_URL}/${image.path}`}
                     alt="Uploaded face"
                     sx={{ height: 200, objectFit: 'cover' }}
                   />
