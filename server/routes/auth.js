@@ -10,7 +10,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback"
+    callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/google/callback`
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -49,21 +49,38 @@ passport.deserializeUser(async (id, done) => {
 
 // Google OAuth routes
 router.get('/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    session: false 
+  })
 );
 
 router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { 
+    failureRedirect: '/login',
+    session: false 
+  }),
   (req, res) => {
-    // Create JWT token
-    const token = jwt.sign(
-      { id: req.user._id },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '1d' }
-    );
-    
-    // Redirect to frontend with token
-    res.redirect(`${process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace'}/auth-success?token=${token}`);
+    try {
+      // Create JWT token
+      const token = jwt.sign(
+        { 
+          id: req.user._id,
+          email: req.user.email,
+          name: req.user.name
+        },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '1d' }
+      );
+      
+      // Redirect to frontend with token
+      const redirectUrl = `${process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace'}/auth-success?token=${token}`;
+      console.log('Redirecting to:', redirectUrl);
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error('Error in Google callback:', error);
+      res.redirect('/login');
+    }
   }
 );
 
