@@ -302,20 +302,19 @@ const Dashboard = () => {
               </Card>
             </Box>
 
-            <Paper sx={{ p: 2, mb: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                General Analysis
-              </Typography>
-              <Typography variant="body1" color="text.secondary">
-                {analysisResult.message}
-              </Typography>
-            </Paper>
-
             {analysisTab === 0 && (
               <Box>
                 <Typography variant="h6" gutterBottom>
                   Personality Analysis
                 </Typography>
+                <Paper sx={{ p: 2, mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    General Analysis
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {analysisResult.message}
+                  </Typography>
+                </Paper>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Paper sx={{ p: 2, mb: 2 }}>
@@ -547,11 +546,11 @@ const Dashboard = () => {
                         </Typography>
                         <LinearProgress
                           variant="determinate"
-                          value={analysisResult.beautyAnalysis?.symmetryScore * 100}
+                          value={Math.min(Math.max(analysisResult.beautyAnalysis?.symmetryScore * 100, 0), 100)}
                           sx={{ mb: 1 }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {analysisResult.beautyAnalysis?.symmetryScore * 100}% symmetrical
+                          {Math.min(Math.max(Math.round(analysisResult.beautyAnalysis?.symmetryScore * 100), 0), 100)}% symmetrical
                         </Typography>
                       </Box>
                       <Box sx={{ mb: 2 }}>
@@ -560,11 +559,11 @@ const Dashboard = () => {
                         </Typography>
                         <LinearProgress
                           variant="determinate"
-                          value={analysisResult.beautyAnalysis?.goldenRatioScore * 100}
+                          value={Math.min(Math.max(analysisResult.beautyAnalysis?.goldenRatioScore * 100, 0), 100)}
                           sx={{ mb: 1 }}
                         />
                         <Typography variant="body2" color="text.secondary">
-                          {analysisResult.beautyAnalysis?.goldenRatioScore * 100}% match with Golden Ratio
+                          {Math.min(Math.max(Math.round(analysisResult.beautyAnalysis?.goldenRatioScore * 100), 0), 100)}% match with Golden Ratio
                         </Typography>
                       </Box>
                       <Box>
@@ -573,7 +572,7 @@ const Dashboard = () => {
                         </Typography>
                         <LinearProgress
                           variant="determinate"
-                          value={analysisResult.beautyAnalysis?.aestheticBalance?.score * 100}
+                          value={Math.min(Math.max(analysisResult.beautyAnalysis?.aestheticBalance?.score * 100, 0), 100)}
                           sx={{ mb: 1 }}
                         />
                         <Typography variant="body2" color="text.secondary">

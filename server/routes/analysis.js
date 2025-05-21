@@ -130,7 +130,12 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
           content: [
             {
               type: "text",
-              text: "Analyze the face in the image and provide a detailed analysis in JSON format. Include personality traits, age, health indicators, and beauty features."
+              text: `Analyze this high-resolution image of a human face. Identify the person's face shape, symmetry, eyebrow position, eye spacing, nose shape, and jawline. Based on this information, provide insights aligned with traditional Chinese face reading and modern personality theories. Provide a detailed analysis in JSON format. Include personality traits, age, health indicators, and beauty features.
+
+For beauty and symmetry scores, ensure all values are between 0 and 1 (will be converted to percentages 0-100%). This includes:
+- symmetry_score (0-1)
+- golden_ratio_score (0-1)
+- aesthetic_balance.score (0-1)`
             },
             {
               type: "image_url",
@@ -201,8 +206,14 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
               age_health_analysis: {
                 type: "object",
                 properties: {
-                  estimated_age: { type: "number" },
-                  biological_age: { type: "number" },
+                  estimated_age: { 
+                    type: "number",
+                    description: "Estimated chronological age"
+                  },
+                  biological_age: { 
+                    type: "number",
+                    description: "Estimated biological age based on facial features"
+                  },
                   health_indicators: {
                     type: "array",
                     items: {
@@ -216,21 +227,30 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
                   stress_level: {
                     type: "object",
                     properties: {
-                      value: { type: "number" },
+                      value: { 
+                        type: "number",
+                        description: "Stress level between 0 and 1"
+                      },
                       interpretation: { type: "string" }
                     }
                   },
                   fatigue_level: {
                     type: "object",
                     properties: {
-                      value: { type: "number" },
+                      value: { 
+                        type: "number",
+                        description: "Fatigue level between 0 and 1"
+                      },
                       interpretation: { type: "string" }
                     }
                   },
                   hydration_level: {
                     type: "object",
                     properties: {
-                      value: { type: "number" },
+                      value: { 
+                        type: "number",
+                        description: "Hydration level between 0 and 1"
+                      },
                       interpretation: { type: "string" }
                     }
                   }
@@ -239,12 +259,21 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
               beauty_analysis: {
                 type: "object",
                 properties: {
-                  symmetry_score: { type: "number" },
-                  golden_ratio_score: { type: "number" },
+                  symmetry_score: { 
+                    type: "number",
+                    description: "Score between 0 and 1 representing facial symmetry"
+                  },
+                  golden_ratio_score: { 
+                    type: "number",
+                    description: "Score between 0 and 1 representing match with golden ratio"
+                  },
                   aesthetic_balance: {
                     type: "object",
                     properties: {
-                      score: { type: "number" },
+                      score: { 
+                        type: "number",
+                        description: "Score between 0 and 1 representing aesthetic balance"
+                      },
                       interpretation: { type: "string" }
                     }
                   },
@@ -254,7 +283,10 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
                       type: "object",
                       properties: {
                         name: { type: "string" },
-                        similarity: { type: "number" },
+                        similarity: { 
+                          type: "number",
+                          description: "Similarity score between 0 and 1"
+                        },
                         features: {
                           type: "array",
                           items: { type: "string" }
@@ -312,6 +344,55 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
       };
     }
 
+    // Make a separate API call for celebrity matching
+    const celebrityResponse = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `Based on this person's facial features, find 3-5 celebrities who share similar facial characteristics. Consider:
+1. Overall facial structure and shape
+2. Eye shape and spacing
+3. Nose shape and size
+4. Jawline and chin structure
+5. Facial proportions
+
+Return the results in this JSON format:
+{
+  "celebrity_matches": [
+    {
+      "name": "Celebrity name",
+      "similarity": 0.85, // Similarity score between 0 and 1
+      "features": ["List of specific facial features that match"]
+    }
+  ]
+}`
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: `data:${image.mimetype};base64,${base64Image}`
+              }
+            }
+          ]
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    let celebrityData;
+    try {
+      celebrityData = JSON.parse(celebrityResponse.choices[0].message.content);
+    } catch (error) {
+      console.error('Error parsing celebrity response:', error);
+      celebrityData = {
+        celebrity_matches: []
+      };
+    }
+
     // Clean up the traits arrays to remove duplicates and long sentences
     const cleanTraits = (traits) => {
       return [...new Set(traits)]
@@ -365,7 +446,7 @@ router.post('/analyze/:imageId', auth, async (req, res) => {
           score: analysisData.beauty_analysis?.aesthetic_balance?.score || 0,
           interpretation: analysisData.beauty_analysis?.aesthetic_balance?.interpretation || ""
         },
-        celebrityMatches: (analysisData.beauty_analysis?.celebrity_matches || []).map(match => ({
+        celebrityMatches: (celebrityData.celebrity_matches || []).map(match => ({
           name: match.name,
           similarity: match.similarity,
           features: match.features || []
