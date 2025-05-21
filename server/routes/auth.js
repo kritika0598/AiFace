@@ -10,7 +10,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/google/callback`
+    callbackURL: 'http://AiFaceServiceLo-bhszfnwz-1872523994.us-east-1.elb.amazonaws.com/api/auth/google/callback'
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -49,19 +49,31 @@ passport.deserializeUser(async (id, done) => {
 
 // Google OAuth routes
 router.get('/google',
-  passport.authenticate('google', { 
-    scope: ['profile', 'email'],
-    session: false 
-  })
+  (req, res, next) => {
+    console.log('Initiating Google OAuth flow');
+    passport.authenticate('google', { 
+      scope: ['profile', 'email'],
+      session: false 
+    })(req, res, next);
+  }
 );
 
 router.get('/google/callback',
-  passport.authenticate('google', { 
-    failureRedirect: '/login',
-    session: false 
-  }),
+  (req, res, next) => {
+    console.log('Received Google OAuth callback');
+    passport.authenticate('google', { 
+      failureRedirect: '/login',
+      session: false 
+    })(req, res, next);
+  },
   (req, res) => {
     try {
+      console.log('Processing successful Google authentication');
+      if (!req.user) {
+        console.error('No user object in request');
+        return res.redirect('/login');
+      }
+
       // Create JWT token
       const token = jwt.sign(
         { 

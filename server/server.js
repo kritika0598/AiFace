@@ -10,13 +10,31 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Add request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Initialize Passport
 app.use(passport.initialize());
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ 
+    message: 'Internal server error',
+    error: err.message
+  });
+});
 
 // MongoDB Atlas Connection
 const connectDB = async () => {
@@ -87,6 +105,8 @@ app.use('/api/analysis', analysisRoutes);
 app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  console.log('CORS Origin:', process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace');
+  console.log('Backend URL:', process.env.BACKEND_URL || 'http://localhost:5000');
 }); 
