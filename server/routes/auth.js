@@ -63,7 +63,7 @@ router.get('/google/callback',
     );
     
     // Redirect to frontend with token
-    res.redirect(`${process.env.CLIENT_URL || 'http://localhost:3000'}/auth-success?token=${token}`);
+    res.redirect(`${process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace'}/auth-success?token=${token}`);
   }
 );
 
