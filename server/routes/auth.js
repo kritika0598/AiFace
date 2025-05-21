@@ -89,8 +89,8 @@ router.get('/google/callback',
         { expiresIn: '1d' }
       );
       
-      // Redirect to frontend with token
-      const redirectUrl = `${process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace'}/auth-success?token=${token}`;
+      // Redirect to frontend with token using hash format
+      const redirectUrl = `${process.env.CLIENT_URL || 'https://kritika0598.github.io/AiFace'}/#/auth-success?token=${token}`;
       console.log('Redirecting to:', redirectUrl);
       res.redirect(redirectUrl);
     } catch (error) {
