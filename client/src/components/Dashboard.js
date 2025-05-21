@@ -269,17 +269,54 @@ const Dashboard = () => {
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Card>
-                <CardMedia
-                  component="img"
-                  image={`${API_URL}/${images.find(img => img._id === selectedImage)?.path}`}
-                  alt="Analyzed face"
-                  sx={{
-                    width: '100%',
-                    maxHeight: '500px',
-                    objectFit: 'contain',
-                    bgcolor: 'black'
-                  }}
-                />
+                <Box sx={{ position: 'relative' }}>
+                  <CardMedia
+                    component="img"
+                    image={`${API_URL}/${images.find(img => img._id === selectedImage)?.path}`}
+                    alt="Analyzed face"
+                    sx={{
+                      width: '100%',
+                      maxHeight: '500px',
+                      objectFit: 'contain',
+                      bgcolor: 'black'
+                    }}
+                  />
+                  {analyzingImageId === selectedImage && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          width: '100%',
+                          height: '100%',
+                          bgcolor: 'transparent',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: '2px',
+                            bgcolor: theme.palette.primary.main,
+                            animation: `${scanningAnimation} 2s infinite linear`
+                          }
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Box>
                 <CardContent>
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
@@ -533,12 +570,49 @@ const Dashboard = () => {
                     }
                   }}
                 >
-                  <CardMedia
-                    component="img"
-                    image={`${API_URL}/${image.path}`}
-                    alt="Uploaded face"
-                    sx={{ height: 200, objectFit: 'cover' }}
-                  />
+                  <Box sx={{ position: 'relative' }}>
+                    <CardMedia
+                      component="img"
+                      image={`${API_URL}/${image.path}`}
+                      alt="Uploaded face"
+                      sx={{ height: 200, objectFit: 'cover' }}
+                    />
+                    {analyzingImageId === image._id && (
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            position: 'absolute',
+                            width: '100%',
+                            height: '100%',
+                            bgcolor: 'transparent',
+                            '&::after': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: '2px',
+                              bgcolor: theme.palette.primary.main,
+                              animation: `${scanningAnimation} 2s infinite linear`
+                            }
+                          }}
+                        />
+                      </Box>
+                    )}
+                  </Box>
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="body2" color="text.secondary">
                       Uploaded {new Date(image.uploadedAt).toLocaleDateString()}
