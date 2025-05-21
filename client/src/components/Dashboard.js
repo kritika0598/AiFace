@@ -22,15 +22,11 @@ import {
   DialogContent,
   DialogActions,
   Paper,
-  Fade,
-  Zoom,
   Tooltip,
   Alert,
   Snackbar,
-  Divider,
   Avatar,
   Chip,
-  LinearProgress,
   useTheme,
   alpha
 } from '@mui/material';
@@ -167,11 +163,7 @@ const Dashboard = () => {
       setAnalysisDialogOpen(true);
     } catch (error) {
       if (error.response?.status === 404) {
-        setSnackbar({
-          open: true,
-          message: 'No previous analysis found. Please analyze the image first.',
-          severity: 'info'
-        });
+        handleAnalyze(imageId);
       } else {
         console.error('Error fetching analysis:', error);
         setSnackbar({
@@ -186,6 +178,7 @@ const Dashboard = () => {
   const handleAnalyze = async (imageId) => {
     try {
       setAnalyzingImageId(imageId);
+      setAnalysisDialogOpen(true);
       const response = await axios.post(
         `${API_URL}/api/analysis/analyze/${imageId}`,
         {},
@@ -198,7 +191,6 @@ const Dashboard = () => {
       if (response.data.usage) {
         setUsage(response.data.usage);
       }
-      setAnalysisDialogOpen(true);
       setSnackbar({
         open: true,
         message: 'Analysis completed successfully',
@@ -425,13 +417,36 @@ const Dashboard = () => {
   );
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <AppBar position="static" elevation={0}>
-        <Toolbar>
-          <FaceIcon sx={{ mr: 2 }} />
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            AI Face Analysis
-          </Typography>
+    <Box 
+      sx={{ 
+        minHeight: '100vh',
+        bgcolor: 'background.default',
+        backgroundImage: 'url(https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=2070&auto=format&fit=crop)', 
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bgcolor: 'rgba(0, 0, 0, 0.75)',
+          zIndex: 0,
+          backdropFilter: 'blur(2px)'
+        }
+      }}
+    >
+      <AppBar position="static" elevation={0} sx={{ position: 'relative', zIndex: 1, bgcolor: 'rgba(0, 0, 0, 0.8)' }}>
+        <Toolbar sx={{ justifyContent: 'space-between', px: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <FaceIcon sx={{ fontSize: 28 }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              AI Face Analysis
+            </Typography>
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box
               sx={{
@@ -462,21 +477,35 @@ const Dashboard = () => {
                 Welcome, {user?.name || 'User'}
               </Typography>
             </Box>
-            <IconButton color="inherit" onClick={handleLogout}>
-              <LogoutIcon />
-            </IconButton>
+            <Tooltip title="Logout">
+              <IconButton 
+                color="inherit" 
+                onClick={handleLogout}
+                sx={{ 
+                  bgcolor: alpha(theme.palette.primary.main, 0.1),
+                  '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.2)
+                  }
+                }}
+              >
+                <LogoutIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" sx={{ py: 4, position: 'relative', zIndex: 1 }}>
         <Paper
           elevation={0}
           sx={{
             p: 3,
             mb: 4,
-            bgcolor: alpha(theme.palette.primary.main, 0.05),
-            borderRadius: 2
+            bgcolor: alpha(theme.palette.background.paper, 0.9),
+            borderRadius: 2,
+            backdropFilter: 'blur(10px)',
+            border: '1px solid',
+            borderColor: alpha(theme.palette.primary.main, 0.1)
           }}
         >
           <Box
@@ -488,7 +517,7 @@ const Dashboard = () => {
             }}
           >
             <Typography variant="h5" align="center">
-              Upload a Face Image for Analysis
+            Discover What Your Face Says About You!
             </Typography>
             <Typography variant="body1" color="text.secondary" align="center">
               Get detailed insights about facial features, emotions, and more
@@ -570,6 +599,10 @@ const Dashboard = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'transform 0.2s',
+                    bgcolor: alpha(theme.palette.background.paper, 0.9),
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid',
+                    borderColor: alpha(theme.palette.primary.main, 0.1),
                     '&:hover': {
                       transform: 'scale(1.02)'
                     }
@@ -632,16 +665,19 @@ const Dashboard = () => {
                     <Button
                       size="small"
                       startIcon={<PsychologyIcon />}
-                      onClick={() => fetchAnalysis(image._id)}
+                      onClick={() => handleAnalyze(image._id)}
                       disabled={analyzingImageId === image._id || usage.remaining === 0}
+                      color="primary"
+                      variant="contained"
                     >
-                      Analyze
+                      {analyzingImageId === image._id ? 'Analyzing...' : 'Analyze'}
                     </Button>
                     <Button
                       size="small"
                       startIcon={<HistoryIcon />}
                       onClick={() => fetchAnalysis(image._id)}
                       color="secondary"
+                      variant="outlined"
                     >
                       View Results
                     </Button>
@@ -666,6 +702,7 @@ const Dashboard = () => {
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        sx={{ position: 'relative', zIndex: 1 }}
       >
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
