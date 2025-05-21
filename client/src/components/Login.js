@@ -7,13 +7,15 @@ import {
   Box,
   Button,
   Typography,
-  Paper
+  Paper,
+  Alert
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 
 const Login = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [error, setError] = React.useState('');
 
   React.useEffect(() => {
     if (user) {
@@ -22,7 +24,15 @@ const Login = () => {
   }, [user, navigate]);
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/api/auth/google`;
+    try {
+      setError('');
+      const authUrl = `${API_URL}/api/auth/google`;
+      console.log('Redirecting to:', authUrl);
+      window.location.href = authUrl;
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Failed to initiate Google login. Please try again.');
+    }
   };
 
   return (
@@ -48,6 +58,11 @@ const Login = () => {
           <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
             Welcome to AiFace
           </Typography>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, width: '100%' }}>
+              {error}
+            </Alert>
+          )}
           <Button
             variant="contained"
             startIcon={<GoogleIcon />}

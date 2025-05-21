@@ -10,10 +10,12 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://AiFaceServiceLo-bhszfnwz-1872523994.us-east-1.elb.amazonaws.com/api/auth/google/callback'
+    callbackURL: 'http://AiFaceServiceLo-bhszfnwz-1872523994.us-east-1.elb.amazonaws.com/api/auth/google/callback',
+    proxy: true
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
+      console.log('Google profile:', profile);
       // Check if user already exists
       let user = await User.findOne({ googleId: profile.id });
       
@@ -29,6 +31,7 @@ passport.use(new GoogleStrategy({
       
       return done(null, user);
     } catch (error) {
+      console.error('Error in Google strategy:', error);
       return done(error, null);
     }
   }
@@ -53,7 +56,8 @@ router.get('/google',
     console.log('Initiating Google OAuth flow');
     passport.authenticate('google', { 
       scope: ['profile', 'email'],
-      session: false 
+      session: false,
+      prompt: 'select_account'
     })(req, res, next);
   }
 );
